@@ -1,8 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+from matplotlib.backends.backend_pdf import PdfPages
 
-# Leer el archivo de datos
-data = pd.read_csv('Talleres\Taller_1\Punto_2\Data\hysterisis.dat')
+#Ruta relativa del archivo
+ruta_archivo = os.path.join(os.path.dirname(__file__), 'Data2', 'hysteresis.dat')
+datos = pd.read_csv(ruta_archivo, delimiter="\t")
 
-print(data)
