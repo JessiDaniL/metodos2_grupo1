@@ -110,4 +110,4 @@ B_T = B / 1000 #A Testlas
 
 area = 0.5 * np.abs(np.dot(H[:-1] + H[1:], B[1:] - B[:-1]))
 
-print(f"La pérdida de energía por unidad de volumen es: {area} J/m³")
+print(f"2.c) La pérdida de energía por unidad de volumen es: {area} J/m³")
