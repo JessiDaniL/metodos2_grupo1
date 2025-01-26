@@ -3,43 +3,30 @@ import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy.signal import find_peaks
 import os
+import re
 
 #Carga de datos en formato de lista
 
 with open('Talleres\Taller_1\Punto_2\Data2/hysteresis.dat', 'r') as file:
-    lines = file.readlines() 
+    datos = file.readlines() 
 
-# Organización de los datos en listas
+# Listas vacías
 tiempo = []
 B = []
 H = []
 
-for line in lines:
-    corregido = ""
-    i = 0
-    while i < len(line):
+# Función para dividir los números correctamente
+def filtro(valor)->list:
+    busqueda = re.findall(r'-?\d*\.\d+|\d+\.\d+', valor)
+    return busqueda
 
-        # Separar números negativos
-        if line[i] == '-' and i > 0 and line[i-1] not in [' ', '-']:
-            corregido += " -"
-
-        # Separar números "0."
-        elif line[i:i+2] == '0.' and i > 0 and line[i-1] not in [' ', '-']:
-            corregido += " 0."
-            i += 1
-        else:
-            corregido += line[i]
-        i += 1
-
-    numeros = list(filter(None, corregido.split()))
-    
-    # Convertir a float y asignar a listas
-    try:
-        tiempo.append(float(numeros[0]))
-        B.append(float(numeros[1]))
-        H.append(float(numeros[2]))
-    except (ValueError, IndexError) as e:
-        print(f"Error al procesar la línea: {line.strip()} -> {e}")
+# Filtrar y separar los datos en tres columnas y añadir a las listas respectivas
+for valor in datos:
+    resultado = filtro(valor)
+    if len(resultado) == 3:
+        tiempo.append(float(resultado[0]))
+        B.append(float(resultado[1]))
+        H.append(float(resultado[2]))
 
 "Punto 2a"
 
