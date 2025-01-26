@@ -87,10 +87,12 @@ plt.close()
 
 fig_size = (10, 8)
 plt.figure(figsize=fig_size)
-plt.scatter(H, B)
+plt.scatter(B, H)
 plt.title('Densidad del campo interno vs campo magnético')
 plt.ylabel('Densidad del campo interno (A/m)')
 plt.xlabel('Campo magnético (mT)')
 plt.grid(True)
 
-plt.show()
+# Guardar el archivo PDF en la carpeta punto_2
+ruta_guardar_pdf = os.path.join(os.path.dirname(__file__), 'energy.pdf')
+plt.savefig(ruta_guardar_pdf)
