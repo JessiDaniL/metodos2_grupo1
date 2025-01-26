@@ -10,17 +10,16 @@ import re
 with open('Talleres\Taller_1\Punto_2\Data2/hysteresis.dat', 'r') as file:
     datos = file.readlines() 
 
-# Listas vacías
 tiempo = []
 B = []
 H = []
 
-# Función para dividir los números correctamente
+# Función para separar los números
 def filtro(valor)->list:
     busqueda = re.findall(r'-?\d*\.\d+|\d+\.\d+', valor)
     return busqueda
 
-# Filtrar y separar los datos en tres columnas y añadir a las listas respectivas
+# Filtrar y separar los datos en tres columnas: tiempo, B y H
 for valor in datos:
     resultado = filtro(valor)
     if len(resultado) == 3:
@@ -83,7 +82,7 @@ plt.close()
 
 "Punto 2c"
 
-#Graficar H vs B
+# Graficar H vs B
 
 fig_size = (10, 8)
 plt.figure(figsize=fig_size)
@@ -96,3 +95,19 @@ plt.grid(True)
 # Guardar el archivo PDF en la carpeta punto_2
 ruta_guardar_pdf = os.path.join(os.path.dirname(__file__), 'energy.pdf')
 plt.savefig(ruta_guardar_pdf)
+
+# Transformar tiempo, B y H a arrays
+
+tiempo = np.array(tiempo)
+B = np.array(B)
+H = np.array(H)
+
+# Conversión de unidades
+
+B_T = B / 1000 #A Testlas
+
+#Cálculo del área encerrada por el ciclo de histérisis
+
+area = 0.5 * np.abs(np.dot(H[:-1] + H[1:], B[1:] - B[:-1]))
+
+print(f"La pérdida de energía por unidad de volumen es: {area} J/m³")
