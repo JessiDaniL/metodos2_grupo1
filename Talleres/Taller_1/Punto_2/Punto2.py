@@ -108,6 +108,6 @@ B_T = B / 1000 #A Testlas
 
 #Cálculo del área encerrada por el ciclo de histérisis
 
-area = 0.5 * np.abs(np.dot(H[:-1] + H[1:], B[1:] - B[:-1]))
+area = 0.5 * np.abs(np.dot(H[:-1] + H[1:], B[1:] - B[:-1])) #Regla del trapecio
 
 print(f"2.c) La pérdida de energía por unidad de volumen es: {area} J/m³")
