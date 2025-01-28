@@ -59,7 +59,8 @@ for a in indicesB:
     w.append(tiempo[a])
 del w[-2:]
 
-periodo = (w[-1] - w[0]) * 1000 / (len(w) - 1)
+periodo_ms = (w[-1] - w[0]) / (len(w) - 1)
+periodo = periodo_ms /1000
 frecuencia = 1 / periodo
 
 texto = f"""
