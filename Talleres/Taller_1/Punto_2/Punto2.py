@@ -48,8 +48,8 @@ plt.ylabel('Densidad del campo interno (A/m)')
 plt.subplots_adjust(hspace=0.5)
 
 # Guardar el archivo PDF en la carpeta punto_2
-ruta_guardar_pdf = os.path.join(os.path.dirname(__file__), 'histerico.pdf')
-plt.savefig(ruta_guardar_pdf)
+ruta_guardar_pdf =  ('histerico.pdf')
+plt.savefig(ruta_guardar_pdf,format="pdf", bbox_inches='tight')
 
 "Punto 2b"
 
@@ -78,8 +78,8 @@ plt.axis('off')
 plt.text(0.5, 0.8, texto, fontsize=12, ha='center', va='top', wrap=True, linespacing=1.5)
 
 # Ruta relativa para guardar el archivo PDF en la carpeta punto_2
-ruta_guardar_pdf = os.path.join(os.path.dirname(__file__), 'frecuencia_resultados.pdf')
-plt.savefig(ruta_guardar_pdf, format="pdf", bbox_inches='tight')
+
+plt.savefig('frecuencia_resultados.pdf', format="pdf", bbox_inches='tight')
 plt.close()
 
 "Punto 2c"
