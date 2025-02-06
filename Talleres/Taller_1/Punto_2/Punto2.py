@@ -3,43 +3,30 @@ import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy.signal import find_peaks
 import os
+import re
 
 #Carga de datos en formato de lista
 
-with open(r'C:\Users\sebas\OneDrive\Documentos\Metodos_computacionales2\metodos2_grupo1\Talleres\Taller_1\Punto_2\Data2/hysteresis.dat', 'r') as file:
-    lines = file.readlines() 
 
-# Organización de los datos en listas
+with open('Talleres\Taller_1\Punto_2\Data2/hysteresis.dat', 'r') as file:
+    datos = file.readlines() 
+
 tiempo = []
 B = []
 H = []
 
-for line in lines:
-    corregido = ""
-    i = 0
-    while i < len(line):
+# Función para separar los números
+def filtro(valor)->list:
+    busqueda = re.findall(r'-?\d*\.\d+|\d+\.\d+', valor)
+    return busqueda
 
-        # Separar números negativos
-        if line[i] == '-' and i > 0 and line[i-1] not in [' ', '-']:
-            corregido += " -"
-
-        # Separar números "0."
-        elif line[i:i+2] == '0.' and i > 0 and line[i-1] not in [' ', '-']:
-            corregido += " 0."
-            i += 1
-        else:
-            corregido += line[i]
-        i += 1
-
-    numeros = list(filter(None, corregido.split()))
-    
-    # Convertir a float y asignar a listas
-    try:
-        tiempo.append(float(numeros[0]))
-        B.append(float(numeros[1]))
-        H.append(float(numeros[2]))
-    except (ValueError, IndexError) as e:
-        print(f"Error al procesar la línea: {line.strip()} -> {e}")
+# Filtrar y separar los datos en tres columnas: tiempo, B y H
+for valor in datos:
+    resultado = filtro(valor)
+    if len(resultado) == 3:
+        tiempo.append(float(resultado[0]))
+        B.append(float(resultado[1]))
+        H.append(float(resultado[2]))
 
 "Punto 2a"
 
@@ -73,7 +60,8 @@ for a in indicesB:
     w.append(tiempo[a])
 del w[-2:]
 
-periodo = (w[-1] - w[0]) * 1000 / (len(w) - 1)
+periodo_ms = (w[-1] - w[0]) / (len(w) - 1)
+periodo = periodo_ms /1000
 frecuencia = 1 / periodo
 
 texto = f"""
@@ -96,14 +84,32 @@ plt.close()
 
 "Punto 2c"
 
-#Graficar H vs B
+# Graficar H vs B
 
 fig_size = (10, 8)
 plt.figure(figsize=fig_size)
-plt.scatter(H, B)
+plt.scatter(B, H)
 plt.title('Densidad del campo interno vs campo magnético')
 plt.ylabel('Densidad del campo interno (A/m)')
 plt.xlabel('Campo magnético (mT)')
 plt.grid(True)
 
-plt.show()
+# Guardar el archivo PDF en la carpeta punto_2
+ruta_guardar_pdf = os.path.join(os.path.dirname(__file__), 'energy.pdf')
+plt.savefig(ruta_guardar_pdf)
+
+# Transformar tiempo, B y H a arrays
+
+tiempo = np.array(tiempo)
+B = np.array(B)
+H = np.array(H)
+
+# Conversión de unidades
+
+B_T = B / 1000 #A Testlas
+
+#Cálculo del área encerrada por el ciclo de histérisis
+
+area = 0.5 * np.abs(np.dot(H[:-1] + H[1:], B[1:] - B[:-1])) #Regla del trapecio
+
+print(f"2.c) La pérdida de energía por unidad de volumen es: {area} J/m³")

@@ -5,7 +5,7 @@ from scipy.optimize import curve_fit
 from scipy.integrate import simpson
 
 #cargamos y guardamos los datos de intensidad y longitud de onda 
-data = pd.read_csv(r"C:\Users\sebas\OneDrive\Documentos\Metodos_computacionales2\metodos2_grupo1\Talleres\Taller_1\Punto_1\Data\Rhodium.csv")
+data = pd.read_csv(r"Talleres\Taller_1\Punto_1\Data\Rhodium.csv")
 lambda_=data["Wavelength (pm)"].tolist()
 intensidad= data["Intensity (mJy)"].tolist()
 
