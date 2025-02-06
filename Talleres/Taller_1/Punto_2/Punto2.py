@@ -6,7 +6,7 @@ import os
 
 #Carga de datos en formato de lista
 
-with open('Talleres\Taller_1\Punto_2\Data2/hysteresis.dat', 'r') as file:
+with open(r'C:\Users\sebas\OneDrive\Documentos\Metodos_computacionales2\metodos2_grupo1\Talleres\Taller_1\Punto_2\Data2/hysteresis.dat', 'r') as file:
     lines = file.readlines() 
 
 # Organización de los datos en listas
