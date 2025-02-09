@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+#Punto 3.b
+
 img_gato = plt.imread("Talleres/Taller_2/Data/catto.png")
 img_castillo = plt.imread("Talleres/Taller_2/Data/Noisy_Smithsonian_Castle.jpg")
 
