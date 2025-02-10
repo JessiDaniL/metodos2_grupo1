@@ -63,7 +63,7 @@ plt.tight_layout()
 
 ruta_guardar_pdf =  ('Talleres/Taller_2/1.a.pdf')
 plt.savefig(ruta_guardar_pdf,format="pdf", bbox_inches='tight')
-
+plt.clf()
 
 
 print ("1.a) Cuando el valor del ruido es igual o mayor al valor de la amplitud de una las frecuencias no se puede distingir la frecuencia asociada a esa amplitud  ")
@@ -122,7 +122,7 @@ plt.title("FWHM vs t_max en escala log-log")
 plt.legend()
 ruta_guardar_pdf =  ('Talleres/Taller_2/1.b.pdf')
 plt.savefig(ruta_guardar_pdf,format="pdf", bbox_inches='tight')
-
+plt.clf()
 
 
 "Punto 1.c"
@@ -162,7 +162,7 @@ plt.ylabel("Intensidad y")
 plt.title("Intensidad vs. Fase")
 ruta_guardar_pdf =  ('Talleres/Taller_2/1.c.pdf')
 plt.savefig(ruta_guardar_pdf,format="pdf", bbox_inches='tight')
-
+plt.clf()
 
 
 "Punto 2"
@@ -209,7 +209,7 @@ plt.title('H vs fase_general')
 plt.tight_layout()
 ruta_guardar_pdf =  ('Talleres/Taller_2/2.a.pdf')
 plt.savefig(ruta_guardar_pdf,format="pdf", bbox_inches='tight')
-
+plt.clf()
 
 "Punto 2.b -manchas solares"
 
@@ -296,32 +296,47 @@ ruta_guardar_pdf =  ('Talleres/Taller_2/2.b.pdf')
 plt.savefig(ruta_guardar_pdf,format="pdf", bbox_inches='tight')
 
 "Punto 3.a"
+# Definir el rango de valores de α
+alpha_values = np.linspace(10, 15000, 10) 
 
-#Filtro gaussiano
+# Definir número de filas y columnas
+num_rows = len(alpha_values)
+num_cols = 2
+# Crear la figura con subplots
+fig, axes = plt.subplots(num_rows, num_cols, figsize=(12, 2 * num_rows))
 
-frecuencias = freq_aavso 
+# Transformada de Fourier de la señal original
+transformada = np.fft.fft(SSN)
+frecuencia = np.fft.fftfreq(len(SSN), 1)
+abs_trans_rapida = np.abs(transformada)
 
-trans = np.fft.fft(SSN)
+for i, alpha in enumerate(alpha_values):
+    # Aplicar filtro gaussiano
+    filtro_gaussiano = transformada * np.exp(-(np.abs(frecuencia) * alpha) ** 2)
+    señal_filtrada = np.fft.ifft(filtro_gaussiano).real  # Transformada inversa para obtener la señal filtrada
 
-longitud = len(SSN)
+    #Columna 1: Señal en el dominio del tiempo
+    axes[i, 0].plot(SSN, label="Señal Original", color="black", alpha=0.5)
+    axes[i, 0].plot(señal_filtrada, label=f"Filtrada (α={int(alpha)})", color="red")
+    axes[i, 0].legend()
+    axes[i, 0].set_ylabel("SSN")
+    axes[i, 0].set_xlabel("Tiempo")
+    axes[i, 0].text(0.05, 0.9, f"α={int(alpha)}", transform=axes[i, 0].transAxes, fontsize=10, bbox=dict(facecolor='white', alpha=0.5))
 
-frecuencia = np.fft.fftfreq(longitud, 1)
+    #Columna 2: Magnitud de la Transformada de Fourier
+    axes[i, 1].plot(frecuencia[1:len(SSN)//2], abs_trans_rapida[1:len(SSN)//2], label="Original", color="blue", alpha=0.5)
+    axes[i, 1].plot(frecuencia[1:len(SSN)//2], np.abs(filtro_gaussiano)[1:len(SSN)//2], label="Filtrada", color="orange")
+    axes[i, 1].set_xscale("log")
+    axes[i, 1].set_yscale("log")
+    axes[i, 1].legend()
+    axes[i, 1].set_ylabel("Magnitud")
+    axes[i, 1].set_xlabel("Frecuencia")
 
-abs_trans_rapida = np.abs(trans) #Corresponde a la magnitud de la transformada
+plt.tight_layout()
+ruta_guardar_fig =  ('Talleres/Taller_2/3.1.pdf')
+plt.savefig(ruta_guardar_fig,format="pdf", bbox_inches='tight')
 
-filtro_gaussiano = trans*np.exp(-(np.abs(frecuencia)*1000)**2)
-
-plt.plot((frecuencia[1:longitud//2]),(abs_trans_rapida[1:longitud//2]),label='Original')
-
-plt.plot((frecuencia[1:longitud//2]),((np.abs(filtro_gaussiano))[1:longitud//2]),label='Filtrada')
-
-plt.ylim(10,)
-plt.xscale('log')
-plt.yscale('log')
-plt.legend()
-
-ruta_guardar_pdf = ('Talleres/Taller_2/3.1.pdf')
-plt.savefig(ruta_guardar_pdf,format="pdf", bbox_inches='tight')
+plt.clf()
 
 "Punto 3.b"
 
@@ -397,10 +412,11 @@ plt.imshow(imagen_castillo_final,cmap = cmap)
 ruta_guardar_castillo_png =  ('Talleres/Taller_2/3.b.a.png')
 plt.savefig(ruta_guardar_castillo_png,format="png", bbox_inches='tight')
 
-
-
 reorganizacion_imagen_gato= np.fft.ifftshift(copia_transformada_g)
 imagen_gato_final = np.fft.ifft2(reorganizacion_imagen_gato).real
 plt.imshow(imagen_gato_final,cmap = cmap)
 ruta_guardar_gato_png =  ('Talleres/Taller_2/3.b.b.png')
 plt.savefig(ruta_guardar_gato_png,format="png", bbox_inches='tight')
+
+plt.clf()
+
