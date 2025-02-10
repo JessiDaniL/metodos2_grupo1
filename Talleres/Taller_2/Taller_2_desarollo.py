@@ -299,7 +299,29 @@ plt.savefig(ruta_guardar_pdf,format="pdf", bbox_inches='tight')
 
 #Filtro gaussiano
 
-print(SSN)
+frecuencias = freq_aavso 
+
+trans = np.fft.fft(SSN)
+
+longitud = len(SSN)
+
+frecuencia = np.fft.fftfreq(longitud, 1)
+
+abs_trans_rapida = np.abs(trans) #Corresponde a la magnitud de la transformada
+
+filtro_gaussiano = trans*np.exp(-(np.abs(frecuencia)*1000)**2)
+
+plt.plot((frecuencia[1:longitud//2]),(abs_trans_rapida[1:longitud//2]),label='Original')
+
+plt.plot((frecuencia[1:longitud//2]),((np.abs(filtro_gaussiano))[1:longitud//2]),label='Filtrada')
+
+plt.ylim(10,)
+plt.xscale('log')
+plt.yscale('log')
+plt.legend()
+
+ruta_guardar_pdf = ('Talleres/Taller_2/3.1.pdf')
+plt.savefig(ruta_guardar_pdf,format="pdf", bbox_inches='tight')
 
 "Punto 3.b"
 
