@@ -9,7 +9,8 @@ import matplotlib.dates as mdates
 
 """
 
-El tiempo de procesamiento del código se midió con cronómetro. El tiempo estimado de espera es de 4 minutos.
+El tiempo de procesamiento del código se midió con cronómetro. El tiempo estimado de espera es de 4 minutos para un computador
+AMD Ryzen 5 3600 6 - Core (equivalente en Intel es Intel Core i5-11600K) con una memoria RAM de 16 GB.
 
 """
 
@@ -212,8 +213,6 @@ plt.savefig(ruta_guardar_pdf,format="pdf", bbox_inches='tight')
 
 "Punto 2.b -manchas solares"
 
-import pandas as pd
-import matplotlib.pyplot as plt
 aavso=pd.read_csv(r"Talleres\Taller_2\Data\list_aavso-arssn_daily.txt",sep=r"\s+",header=None,names=["Year", "Month", "Day", "SSN"])
 #con el sep se separa con espacios, y con los demás parámetros se delimitan las columnas
 tiempo_aavso=[]
@@ -295,6 +294,12 @@ plt.grid()
 
 ruta_guardar_pdf =  ('Talleres/Taller_2/2.b.pdf')
 plt.savefig(ruta_guardar_pdf,format="pdf", bbox_inches='tight')
+
+"Punto 3.a"
+
+#Filtro gaussiano
+
+print(SSN)
 
 "Punto 3.b"
 
