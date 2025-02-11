@@ -28,10 +28,12 @@ def datos_prueba(t_max:float, dt:float, amplitudes:NDArray[float],
  return ts,ys
 
 #1.a) Implementamos la transformada explicita de fourier 
+from numba import njit
+@njit
 def Fourier(t, y, f:float) -> complex:
-  F=0
+  F=0.0j
   for i in range(len(t)):
-    F += y[i]*np.exp(-2j*np.pi*f*t[i])
+    F += y[i]*np.exp(-2.0j*np.pi*f*t[i])
   return F
 
 #Generamos los datos para dos señales, una con ruido y otra sin 
@@ -144,13 +146,13 @@ print(f"1.c) frecuencia Nyquist: {f_nyquist:.6f}")
 y_filt=y-y.mean()
 
 #Calculamos la transformada de fourier
-f=np.arange(0,5,0.005)
-FFT_data= np.abs(Fourier(t,y_filt,f))
+f=np.arange(0,5,0.0001)
+FFT_data=[np.abs(Fourier(t,y_filt,f_)) for f_ in f]
 
 #hayamos la frecuencia mas alta, que corresponde a la frecuencia dominante de la señal
 i_max=np.argmax(FFT_data)
-frec_true=round(f[i_max],2)
-print(f"1.c) f true: {frec_true}/Día")
+frec_true=f[i_max]
+print(f"1.c) f true: {frec_true:.3f}/Día")
 
 phi = np.mod(frec_true* t, 1)
 
