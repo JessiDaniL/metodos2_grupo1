@@ -348,7 +348,7 @@ img_castillo = plt.imread("Talleres/Taller_2/Data/Noisy_Smithsonian_Castle.jpg")
 altura_g,ancho_g = img_gato.shape
 altura_c,ancho_c = img_castillo.shape
 
-cmap = plt.get_cmap("grey")
+cmap = plt.get_cmap("gray")
 cmap.set_bad((1,0,0))
 cmap
 
