@@ -7,13 +7,6 @@ from typing import List
 from numpy.typing import NDArray
 import matplotlib.dates as mdates
 
-"""
-
-El tiempo de procesamiento del código se midió con cronómetro. El tiempo estimado de espera es de 4 minutos para un computador
-AMD Ryzen 5 3600 6 - Core (equivalente en Intel es Intel Core i5-11600K) con una memoria RAM de 16 GB.
-
-"""
-
 "Punto 1.a"
 
 #Cargamos la funcion generadora de datos
@@ -348,7 +341,7 @@ img_castillo = plt.imread("Talleres/Taller_2/Data/Noisy_Smithsonian_Castle.jpg")
 altura_g,ancho_g = img_gato.shape
 altura_c,ancho_c = img_castillo.shape
 
-cmap = plt.get_cmap("gray")
+cmap = plt.get_cmap("grey")
 cmap.set_bad((1,0,0))
 cmap
 
