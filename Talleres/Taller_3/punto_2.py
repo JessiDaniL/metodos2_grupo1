@@ -70,7 +70,7 @@ def update(frame):
     return line, electron
 
 ani = animation.FuncAnimation(fig, update, frames=range(0,len(x_r),10), interval=10, blit=True)
-ani.save("2.a.simulation.mp4", writer="ffmpeg", fps=30)
+ani.save("Talleres/Taller_3/2.a.simulation.mp4", writer="ffmpeg", fps=30)
 
 plt.close(fig)
 
@@ -179,7 +179,7 @@ for ax, title in zip(axs, ["Energía Total", "Energía Cinética", "Radio"]):
     ax.legend()
     ax.grid()
 
-plt.savefig("2.b.diagnostics.pdf")  # Guardar la gráfica de diagnósticos
+plt.savefig("Talleres/Taller_3/2.b.diagnostics.pdf")  # Guardar la gráfica de diagnósticos
 plt.close()
 
 #Este código se usó para realizar la animación
@@ -212,7 +212,7 @@ def update(frame):
 
 ani = animation.FuncAnimation(fig, update, frames=len(xl_anim), init_func=init, interval=1)
 
-ani.save("orbita_electron.mp4", writer=animation.FFMpegWriter(fps=30))
+ani.save("Talleres/Taller_3/orbita_electron.mp4", writer=animation.FFMpegWriter(fps=30))
 
 
 
