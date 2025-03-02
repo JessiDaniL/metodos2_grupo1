@@ -545,3 +545,68 @@ plt.close(fig)
 plt.clf()
 
 #Punto b
+
+t_span_2 = (0., 10.)
+
+def trayectoria(t_span, Y, mu, alpha_s):
+    x, y, vx, vy = Y
+    return x * vx + y * vy  # Vector
+
+trayectoria.direction = 0
+
+# Resolver sistema de ecuaciones diferenciales
+sol_b = solve_ivp(ecu_dif, t_span_2, Y0, args=(mu, alpha_s), events=trayectoria, max_step=0.001)
+
+Y_2 = sol_b.y_events[0]
+
+# Afelio
+def aphelios(Y_2):
+    num_aphelios = len(Y_2)
+    aphelios = np.zeros(num_aphelios)
+
+    # Calcular los ángulos de los afelios
+    for p in range(num_aphelios):
+        aphelios[p] = np.arctan2(Y_2[p][1], Y_2[p][0])
+
+    # Ajustar los ángulos
+    for r in range(len(aphelios)):
+        ang = aphelios[r]
+        dif_pi = np.abs(np.pi - np.abs(ang)) # calcula la diferencia entre el valor absoluto de ang y π
+        dif_2pi = np.abs(2 * np.pi - np.abs(ang))  #calcula la diferencia entre el valor absoluto de ang y 2π.
+        dif0 = np.abs(ang) #mide la distancia de ang al valor cero.
+
+        if (dif_pi < dif_2pi) and (dif_pi < dif0):
+            ang = np.abs(ang) - np.pi
+        elif (dif_2pi < dif_pi) and (dif_2pi < dif0):
+            ang = np.abs(ang) - 2 * np.pi
+        
+        aphelios[r] = np.abs(ang)
+
+    return aphelios
+
+aphelios=aphelios(Y_2)
+
+t_aphelios = sol_b.t_events[0] #Tiempos que ocurren los afelios
+
+ang_aphelios = aphelios * (180*3600)/np.pi
+
+tasa_precision = (ang_aphelios[20]-ang_aphelios[6])/(t_aphelios[20]-t_aphelios[6]) * 100 #Afelios bien separados por el tiempo
+coef, cov = np.polyfit(t_aphelios, ang_aphelios, 1, cov=True)
+incertidumbre = np.sqrt(cov[0, 0]) * 100  # Incertidumbre de la pendiente
+
+#Gráfica
+
+mercury_color = (0.75, 0.50, 0.40)  # Gris metálico con un leve tono marrón
+plt.scatter(t_aphelios, ang_aphelios, color=mercury_color, 
+            label=rf"Pendiente = {tasa_precision:.4f} $\pm$ {incertidumbre:.4f} $arcsec/siglo$")
+
+
+plt.xlabel("años")
+plt.ylabel(r"$\text{arcsec}$")
+plt.title("Presición anómala de Mercurio")
+plt.legend()
+
+ruta_guardar_pdf =  ('3_b.pdf')
+plt.savefig(ruta_guardar_pdf,format="pdf", bbox_inches='tight')
+
+plt.clf()
