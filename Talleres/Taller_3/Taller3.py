@@ -547,6 +547,7 @@ plt.clf()
 #Punto b
 
 t_span_2 = (0., 10.)
+alpha_s = 1.09778201e-8 
 
 def trayectoria(t_span, Y, mu, alpha_s):
     x, y, vx, vy = Y
