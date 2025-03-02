@@ -1,5 +1,3 @@
-# metodos2_grupo1
-
 # Número del grupo: 1
 
 # Integrantes:
