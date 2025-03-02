@@ -5,6 +5,7 @@ from scipy.integrate import solve_ivp
 from numba import njit
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
+from matplotlib.backends.backend_pdf import PdfPages
 
 #Parte a--------------------------------------------------------------------------------------------------
 
@@ -473,3 +474,74 @@ writer = animation.FFMpegWriter(fps=60)
 ani.save(r"Talleres\Taller_3\2.mp4", writer=writer)
 
 plt.close(fig)
+
+plt.clf()
+
+"Punto 3"
+#3.a
+
+# Configuración de estilo
+plt.rcParams["axes.labelsize"] = 15
+plt.rcParams["figure.figsize"] = (14, 5)
+
+# Parámetros
+mu = 39.4234021  # Au^3/año^2
+alpha_s = 1.09778201e-2  # Au^2
+t_span = (0.0, 1.5)  # Intervalo de tiempo
+
+# Función de ecuaciones diferenciales
+def ecu_dif(t, Y, mu, alpha_s):
+    x, y, vx, vy = Y
+    r_vec = np.array([x, y])
+    r = np.linalg.norm(r_vec)
+    r_unit = r_vec / r
+
+    a = -(mu / r**2) * ((1 + alpha_s / r**2)) * r_unit
+
+    return np.array([vx, vy, a[0], a[1]])
+
+# Condiciones iniciales
+alpha_m = 0.38709893  # Au
+e = 0.20563069  # Excentricidad
+x_0 = alpha_m * (1 + e)
+y_0 = 0
+vx_0 = 0
+vy_0 = np.sqrt((mu / alpha_m) * (1 - e) / (1 + e))
+Y0 = np.array([x_0, y_0, vx_0, vy_0])
+
+# Resolver sistema de ecuaciones diferenciales
+sol = solve_ivp(ecu_dif, t_span, Y0, args=(mu, alpha_s), max_step=0.01, dense_output=True)
+
+# Interpolación de la solución
+t_dense = np.linspace(sol.t[0], sol.t[-2], 300)
+Y_dense = sol.sol(t_dense)
+x_dense, y_dense, vx_dense, vy_dense = Y_dense
+
+# Configuración de la figura
+fig, ax = plt.subplots()
+ax.set_xlim(x_dense.min() - 0.15, x_dense.max() + 0.15)
+ax.set_ylim(y_dense.min() - 0.15, y_dense.max() + 0.15)
+
+# Inicialización de elementos animados
+punto = ax.scatter(*Y0[:2])
+linea, = ax.plot([], [], label="Órbita de Mercurio")
+
+# Función de actualización para la animación
+def animate(i):
+    punto.set_offsets(Y_dense[:2, i])
+    if i > 1:
+        linea.set_data(x_dense[:i+1], y_dense[:i+1])
+    return punto, linea
+
+# Crear la animación
+anim = animation.FuncAnimation(fig, animate, frames=range(0, len(t_dense), 10), interval=10)
+
+
+# Guardar la animación
+writer = animation.FFMpegWriter(fps=60)
+anim.save(r"Talleres\Taller_3\3.a.mp4", writer=writer)
+
+plt.close(fig)
+plt.clf()
+
+#Punto b
