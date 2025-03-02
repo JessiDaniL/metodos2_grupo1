@@ -74,4 +74,7 @@ ax2.set_ylabel("Y")
 ax2.set_zlabel("Phi")
 
 plt.tight_layout()  
-plt.savefig("solucion_poisson.png",dpi=300,bbox_inches="tight")
+
+#Guardar archivo
+ruta_guardar=  ('Talleres/Taller_3b/1.png')
+plt.savefig(ruta_guardar, format="png", dpi=300, bbox_inches="tight")
