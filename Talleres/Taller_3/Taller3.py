@@ -150,9 +150,9 @@ def runge_kuttal(F,y_0,ts,dt):
     #El while establece una condicion de que se itere siempe y cuando la distancia al centro del origen sea mayor a 0.0000001 radios atómicos
     while np.sqrt(y_v[-1][0]**2 + y_v[-1][1]**2) > 0.0000001**2 and t_v[-1] < ts[1]:
         t = t_v[-1]
-        y_next = RK4_stepl(F, y_v[-1], t, dt)
+        y_siguiente = RK4_stepl(F, y_v[-1], t, dt)
         t_v.append(t + dt)
-        y_v.append(y_next)
+        y_v.append(y_siguiente)
 
     return np.array(t_v), np.array(y_v)
 
