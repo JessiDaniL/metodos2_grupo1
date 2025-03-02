@@ -78,3 +78,83 @@ plt.tight_layout()
 #Guardar archivo
 ruta_guardar=  ('Talleres/Taller_3b/1.png')
 plt.savefig(ruta_guardar, format="png", dpi=300, bbox_inches="tight")
+plt.clf()
+
+
+"Punto 2"
+
+#Datos
+L = 2.0
+dx = 0.02
+c = 1.0
+dt = 0.005
+Nt = 400
+
+s = (c*dt/dx)**2
+
+def inicial(x):
+  return np.exp(-125 * (x-1/2) **2)
+
+x = np.arange(0,L,dx)
+
+condiciones = ["Dirichlet", "Neumann", "Periódica"]
+
+fig, axes = plt.subplots(3, 1, figsize=(6, 9))
+lines = []
+
+datos = []
+colores = ['#800080', '#FF69B4', '#ADD8E6']
+for ax, condicion, color in zip(axes, condiciones,colores):
+    u_pre = inicial(x)
+    u_pas = np.copy(u_pre)
+    u_fut = np.zeros_like(u_pre)
+    datos.append([u_pas, u_pre, u_fut])
+
+    line, = ax.plot(x, u_pre, label=condicion, color = color)
+    ax.set_ylim(-1.1, 1.1)
+    ax.set_xlim(0, L)
+    ax.set_xlabel("Posición")
+    ax.set_ylabel("Amplitud")
+    ax.legend()
+    lines.append(line)
+
+@njit(cache=True)
+def actualizar(u_pas, u_pre, u_fut, tipo):
+    for i in range(1, len(u_pre) - 1): #Aplicar la derivada central
+        u_fut[i] = 2 * u_pre[i] - u_pas[i] + s * (u_pre[i+1] - 2*u_pre[i] + u_pre[i-1])
+
+    # Aplicar condiciones de frontera
+    if tipo == "Dirichlet":
+        u_fut[0] = 0
+        u_fut[-1] = 0
+    elif tipo == "Neumann":
+        u_fut[0] = u_pre[1]
+        u_fut[-1] = u_pre[-2]
+    elif tipo == "Periódica":
+        u_fut[0] = u_pre[-2]
+        u_fut[-1] = u_pre[1]
+
+    return u_pre.copy(), u_fut.copy()
+
+# Crear la animación
+def update(frame):
+    global datos
+    datos_actualizados = []
+    for j, (tipo, (u_pas, u_pre, u_fut)) in enumerate(zip(condiciones, datos)):
+        u_pas_nuevo, u_pre_nuevo = actualizar(u_pas, u_pre, u_fut, tipo)
+        datos_actualizados.append([u_pas_nuevo, u_pre_nuevo, np.copy(u_fut)])
+        lines[j].set_ydata(u_pre_nuevo)
+    datos = datos_actualizados
+    return lines
+
+ani = animation.FuncAnimation(fig, update, frames=Nt, interval=dt * 500, blit=True)
+
+# Guardar el video
+writer = animation.FFMpegWriter(fps=60)
+ani.save(r"Talleres\Taller_3b\2.mp4", writer=writer)
+
+plt.close(fig)
+
+plt.clf()
+
+"Punto 3"
