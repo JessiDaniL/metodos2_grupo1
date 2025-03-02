@@ -466,3 +466,108 @@ plt.savefig(ruta_guardar_pdf,format="pdf", bbox_inches='tight')
 plt.clf()
 
 "Punto 4"
+
+def ec_schordinger (x,y,E):
+    #y es el vector = [f,f´]
+    f,df= y
+    ddf = (x**2-2*E)*f
+    return [df,ddf]
+
+def evento_convergencia(x, y, E, threshold=12):
+    # y[0] es f(x)
+    hipotenusa = np.sqrt(y[0]**2 + y[1]**2)
+    return threshold - hipotenusa
+
+def energía_par(E, x_max=6.0):
+    y0 = [0.3, 0.0]
+    x_span = (0, x_max)
+    
+    ev_func = lambda x, y: evento_convergencia(x, y, E)
+    ev_func.terminal = True
+    ev_func.direction = -1
+
+    sol = solve_ivp(
+        lambda x, y: ec_schordinger(x, y, E),
+        x_span,
+        y0,
+        rtol=1e-7, 
+        atol=1e-9,
+        events=lambda x, y: evento_convergencia(x, y, E)   
+    )
+    
+    f_at_end = sol.y[0][-1] 
+    event_triggered = (len(sol.t_events[0]) > 0)
+    return sol, event_triggered
+
+def energia_impar(E, x_max=6.0):
+    y0 = [0.0, 1.0]  # f(0)=1, f'(0)=0 (pares)
+    x_span = (0, x_max)
+    
+    ev_func = lambda x, y: evento_convergencia(x, y, E)
+    ev_func.terminal = True
+    ev_func.direction = -1
+
+    sol = solve_ivp(
+        lambda x, y: ec_schordinger(x, y, E),
+        x_span,
+        y0,
+        rtol=1e-7, 
+        atol=1e-9,
+        events=lambda x, y: evento_convergencia(x, y, E)   
+    )
+    
+    f_at_end = sol.y[0][-1] 
+    event_triggered = (len(sol.t_events[0]) > 0)
+    return sol, event_triggered
+
+energias_A = np.arange(0.0, 9.52, 0.1)
+candidatos_A = []  # Aquí se guardarán las energías donde la solución converge
+
+for E in energias_A:
+    sol, event_triggered = energia_impar(E)
+    if not event_triggered:
+        candidatos_A.append(E)
+
+candidatos_A = np.array(candidatos_A)
+
+energies = np.arange(0.0, 10.0, 0.1)
+candidatos = []  # Aquí se guardarán las energías donde la solución converge
+
+for E_ in energies:
+    sol, event_triggered = energía_par(E_)
+    if not event_triggered:
+        candidatos.append(E_)
+
+candidatos = np.array(candidatos)
+
+plt.figure(figsize=(6,7))
+x=np.linspace(-6,6,200)
+plt.plot(x,1/2*x**2,linestyle="--",color="lightgray")
+
+for e in candidatos:
+    sol, _ = energía_par(e)
+    t_negativo = -sol.t[::-1]
+    y_negativo= sol.y[0][::-1] 
+    t=np.concatenate((t_negativo, sol.t))
+    E= np.concatenate((y_negativo, sol.y[0]))
+    E= E+e
+    plt.axhline(y=e, color='lightgray')
+    plt.plot(t, E)
+
+for r in candidatos_A:
+    sol_a,_= energia_impar(r)
+    t_n = -sol_a.t[::-1]
+    y_n= -sol_a.y[0][::-1]
+    t_A= np.concatenate((t_n, sol_a.t))
+    E_An= np.concatenate((y_n,sol_a.y[0]))
+    E_An= E_An+r
+    plt.axhline(y=r, color='lightgray')
+    plt.plot(t_A,E_An)
+
+
+plt.ylim(0,10)
+plt.xlim(-6,6)
+plt.ylabel("Energía")
+ruta_guardar=  ('Talleres/Taller_3/4.pdf')
+plt.savefig(ruta_guardar, format="pdf", dpi=300, bbox_inches="tight")
+plt.clf()
