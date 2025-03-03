@@ -190,7 +190,6 @@ def f_prime_larmor(t,f):
 
     return np.array([vx,vy,ax,ay,a_m])
 
-#Método Runge Kutta (4to orden)
 def RK4_stepl(F,y0,t,dt):
     k1 = F(t,y0)
     k2 = F( t+dt/2, y0 + dt*k1/2 )
@@ -220,12 +219,12 @@ def runge_kuttal(F,y_0,ts,dt):
     t_v = [ts[0]]
     y_v = [y_0]
 
-    #El while establece una condicion de que se itere siempe y cuando la distancia al centro del origen sea mayor a 0.0000001 radios atómicos
+    #El while establece una condicion de que se itere siempe y cuando la distancia al centro del origen sea mayor a 0.01 radios atómicos
     while np.sqrt(y_v[-1][0]**2 + y_v[-1][1]**2) > 0.0000001**2 and t_v[-1] < ts[1]:
         t = t_v[-1]
-        y_siguiente = RK4_stepl(F, y_v[-1], t, dt)
+        y_next = RK4_stepl(F, y_v[-1], t, dt)
         t_v.append(t + dt)
-        y_v.append(y_siguiente)
+        y_v.append(y_next)
 
     return np.array(t_v), np.array(y_v)
 
@@ -258,9 +257,8 @@ for ax, title in zip(axs, ["Energía Total", "Energía Cinética", "Radio"]):
     ax.legend()
     ax.grid()
 
-plt.savefig("Talleres/Taller_3/2.b.diagnostics.pdf")
+plt.savefig("2.b.diagnostics.pdf")  # Guardar la gráfica de diagnósticos
 plt.close()
-
 
 paso_animacion = 1000
 xl_anim, yl_anim = xl[::paso_animacion], yl[::paso_animacion]
@@ -273,22 +271,22 @@ ax.set_ylabel("y")
 ax.set_title("Órbita del Electrón")
 
 proton, = ax.plot(0, 0, 'ro', markersize=8, label="Protón")
-punto, = ax.plot([], [], 'bo', markersize=5, label="Electrón")
+puntol, = ax.plot([], [], 'bo', markersize=5, label="Electrón")
 trayectoria, = ax.plot([], [], 'b-', linewidth=1, alpha=0.5)
 
 ax.legend()
 
 def init():
-    punto.set_data([], [])
+    puntol.set_data([], [])
     trayectoria.set_data([], [])
-    return punto, trayectoria
+    return puntol, trayectoria
 
-def update(frame):
-    punto.set_data([xl_anim[frame]], [yl_anim[frame]])
-    trayectoria.set_data(xl_anim[:frame+1], yl_anim[:frame+1])
-    return punto, trayectoria
+def update2(frame):
+    puntol.set_data([xl_anim[frame]], [yl_anim[frame]])
+    trayectoria.set_data(xl_anim[:frame], yl_anim[:frame])
+    return puntol, trayectoria
 
-ani = animation.FuncAnimation(fig, update, frames=len(xl_anim), init_func=init, interval=1)
+ani = animation.FuncAnimation(fig, update2, frames=len(xl_anim), init_func=init, interval=1)
 
 ani.save("Talleres/Taller_3/orbita_electron.mp4", writer=animation.FFMpegWriter(fps=30))
 
@@ -370,14 +368,14 @@ plt.clf()
 t_span_2 = (0., 10.)
 alpha_s = 1.09778201e-8 
 
-def trayectoria(t_span, Y, mu, alpha_s):
+def calcular_trayectoria(t_span, Y, mu, alpha_s):
     x, y, vx, vy = Y
     return x * vx + y * vy  # Vector
 
-trayectoria.direction = 0
+calcular_trayectoria.direction = 0
 
 # Resolver sistema de ecuaciones diferenciales
-sol_b = solve_ivp(ecu_dif, t_span_2, Y0, args=(mu, alpha_s), events=trayectoria, max_step=0.001)
+sol_b = solve_ivp(ecu_dif, t_span_2, Y0, args=(mu, alpha_s), events=calcular_trayectoria, max_step=0.001)
 
 Y_2 = sol_b.y_events[0]
 
