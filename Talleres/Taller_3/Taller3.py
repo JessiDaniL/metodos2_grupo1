@@ -166,8 +166,8 @@ def periodo_simulacion(tiempo, posiciones):
         return tiempos_de_cruce[1] - tiempos_de_cruce[0]
     return None
 
-T_sim = (periodo_simulacion(t_v, y_r))*24.18884
-T_teo = (2 * np.pi)*24.18884
+T_sim = (periodo_simulacion(t_v, y_r))*24.18884*1e6
+T_teo = (2 * np.pi)*24.18884*1e6
 
 #1 h_barra / E = 24.18884 attosegundos
 
@@ -177,18 +177,19 @@ print(f'2.a) P_teo = {T_teo:.5f}; P_sim = {T_sim:.5f}')
 
 alpha = 1/137
 
+@njit
 def f_prime_larmor(t,f):
 
     x, y, vx, vy, a = f
 
     r = np.sqrt(x**2 + y**2)
 
-    ax = -x/np.abs(r**3)
-    ay = -y/np.abs(r**3)
+    ax = -x/(r**3)
+    ay = -y/(r**3)
 
     a_m = np.sqrt(ax**2 + ay**2)
 
-    return np.array([vx,vy,ax,ay,a_m])
+    return np.array([vx,vy,ax,ay,a_m], dtype=np.float64)
 
 def RK4_stepl(F,y0,t,dt):
     k1 = F(t,y0)
@@ -203,34 +204,47 @@ def RK4_stepl(F,y0,t,dt):
     a2 = y_siguiente[4] **2
 
     if t > 0:
-        v_m_nueva = np.sqrt(max((v_m)**2 - ((4/3)*(alpha**3) * a2**2 * dt),0))
+        v_m_nueva = np.sqrt(max((v_m)**2 - ((4/3)*(alpha**3) * a2 * dt),0))
 
         if v_m_nueva > 0:
 
-           v_v_unitario = np.array([vx,vy])/v_m
+           v_v_unitario = np.array([vx,vy], dtype=np.float64)/v_m
            v_v_actualizado = v_v_unitario * v_m_nueva
 
-           y_siguiente[2], y_siguiente[3] = v_v_actualizado
+           y_siguiente[2], y_siguiente[3] = v_v_actualizado[0],v_v_actualizado[1]
 
     return y_siguiente
 
 def runge_kuttal(F,y_0,ts,dt):
 
-    t_v = [ts[0]]
-    y_v = [y_0]
+    max_pasos = 10000
 
-    #El while establece una condicion de que se itere siempe y cuando la distancia al centro del origen sea mayor a 0.01 radios atómicos
-    while np.sqrt(y_v[-1][0]**2 + y_v[-1][1]**2) > 0.0000001**2 and t_v[-1] < ts[1]:
-        t = t_v[-1]
-        y_next = RK4_stepl(F, y_v[-1], t, dt)
-        t_v.append(t + dt)
-        y_v.append(y_next)
+    t_v = np.empty(max_pasos, dtype=np.float64)
+    y_v = np.empty((max_pasos, y_0.shape[0]), dtype=np.float64)
 
-    return np.array(t_v), np.array(y_v)
+    t_v[0] = ts[0]
+    y_v[0, :] = y_0.copy()
 
-condiciones_iniciales_l =np.array([x0, y0, vx0, vy0, 0])
-t_sl = (0,25.7999)
-dt_l = 0.0001
+    i = 0
+
+    while True:
+        t = t_v[i]
+        y_next = RK4_stepl(F, y_v[i], t, dt)
+
+        r = np.sqrt(y_next[0]**2 + y_next[1]**2)  # Distancia al origen
+        if r < 0.01 or t >= ts[1]:  # Condición de salida
+            break
+        
+        i += 1
+
+        t_v[i] = t + dt
+        y_v[i, :] = y_next
+
+    return t_v[:i+1], y_v[:i+1]
+
+condiciones_iniciales_l =np.array([x0, y0, vx0, vy0, 0.0])
+t_sl = (0,1000)
+dt_l = 0.1
 
 t_vl, y_vl = runge_kuttal(f_prime_larmor, condiciones_iniciales_l, t_sl, dt_l)
 
@@ -260,7 +274,7 @@ for ax, title in zip(axs, ["Energía Total", "Energía Cinética", "Radio"]):
 plt.savefig("2.b.diagnostics.pdf")  # Guardar la gráfica de diagnósticos
 plt.close()
 
-paso_animacion = 1000
+paso_animacion = 3
 xl_anim, yl_anim = xl[::paso_animacion], yl[::paso_animacion]
 
 fig, ax = plt.subplots()
@@ -292,7 +306,7 @@ ani.save("Talleres/Taller_3/orbita_electron.mp4", writer=animation.FFMpegWriter(
 
 
 
-tiempo_de_caida = t_vl[-1] * 24.188
+tiempo_de_caida = t_vl[-48] * 24.188*1e6
 print(f'2.b El electrón tiene un tiempo de caida de {tiempo_de_caida:5f} attosegundos')
 
 
