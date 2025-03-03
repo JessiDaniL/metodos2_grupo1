@@ -152,7 +152,7 @@ ani = animation.FuncAnimation(fig, update, frames=Nt, interval=dt * 500, blit=Tr
 
 # Guardar el video
 writer = animation.FFMpegWriter(fps=60)
-ani.save(r"Talleres\Taller_3b\2.mp4", writer=writer)
+ani.save("2.mp4", writer=writer)
 
 plt.close(fig)
 
