@@ -6,8 +6,81 @@ from numba import njit
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
 from matplotlib.backends.backend_pdf import PdfPages
+from scipy.optimize import minimize_scalar
 
 "Punto 1"
+
+# 1.a
+
+#Los parámetros iniciales estan dados por
+g=9.773
+v0=10
+m=10
+
+def x_max(theta_0, beta):
+    theta_0=np.radians(theta_0)
+    v_x=v0*np.cos(theta_0)
+    v_y=v0*np.sin(theta_0)
+    W0=[0, 0, v_x, v_y]
+    tvuelo1=2*v0*np.sin(theta_0)/g
+    tvuelo2=(0, tvuelo1* 1.5) #definen los intervalos de tiempo y el tiempo de vuelo se multiplica por 1.5 para que la simulación tome el tiempo en que cayó el cuerpo.
+
+    def sistema(t, W, theta_0, beta): #definimos la ecuaciones diferenciales
+     x, y, vx, vy=W
+     v=np.sqrt((vx**2)+(vy**2)) #ecuación para la velocidad
+     a_x=(-beta)*v*vx/m #ecuación de la aceleración en x
+     a_y=-g -(beta*v*vy/m) #ecuación de la aceleración en y
+     return [vx, vy, a_x, a_y] #se devuelven las derivadas
+    
+    solucion=solve_ivp(sistema, tvuelo2, W0, args=(theta_0, beta), dense_output=True)
+    
+    # Encontrar el primer punto donde y cambia de signo (aproximación del impacto)
+
+    for i in range(len(solucion.y[1])-1): #se usa solucion.y para ordenar matricialmente los cambios en el tiempo de x, y, v_x y v_y. La posición solucion.1 es posicion de y
+        if solucion.y[1,i]*solucion.y[1,i+1]<0: #y se vuelve negativo
+            return (solucion.y[0, i], solucion.y[1, i], solucion.y[2, i], solucion.y[3, i])  #devuelve x del impacto
+    return (solucion.y[0,-1], solucion.y[1,-1], solucion.y[2,-1], solucion.y[3,-1])  # Si no hay intersección,se devuelve el último x registrado
+
+def theta_max(beta):
+    return minimize_scalar(lambda theta: -x_max(theta, beta)[0], bounds=(0, 90), method='bounded').x
+ #el maximo de x_max es el minimo de -x_max
+beta=0.1
+print(f"1.a) El ángulo óptimo para beta={beta} es {theta_max(beta):.2f} grados")
+
+# 1.b
+
+def deltae(beta):
+    x_final, y_final, vxf, vyf = x_max(theta_max(beta), beta)
+    vf = np.sqrt((vxf**2)+(vyf**2))
+    E0=(1/2)*m*(v0**2)
+    Ef=(1/2)*m*(vf**2) #se definen las energías para cada una
+    resp=abs(Ef-E0) #evitar negativos
+    return resp
+theta_0=np.radians(45)
+bs=np.logspace(0, 0.3, 50)
+bs2=np.logspace(0, 0.3, 50)
+energias=[]
+thetasmax=[]
+for b in bs:
+    energias.append(deltae(b))
+for b in bs2:
+    thetasmax.append(theta_max(b))
+plt.figure(figsize=(8, 5))
+plt.plot(bs2, thetasmax, marker='x', linestyle='--', color='r')
+plt.xscale('log')
+plt.xlabel(r" $\beta$ (kg/m)")
+plt.ylabel(r"$\theta$ (grados)")
+plt.grid()
+plt.savefig("1.a.pdf")
+
+plt.figure(figsize=(8, 5))
+plt.plot(bs, energias, marker='o', linestyle='-', color='b')
+plt.xscale('log')
+plt.xlabel(r" $\beta$ (kg/m)")
+plt.ylabel(r"$\Delta E$ (J)")
+plt.grid()
+plt.savefig("1.b.pdf")
+print("1.b) La energía perdida cuando el coeficiente de fricción es 0 es: ", deltae(0))
 
 "Punto 2"
 

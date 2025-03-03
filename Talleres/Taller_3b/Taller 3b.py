@@ -6,6 +6,7 @@ from numba import njit
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
 from matplotlib.backends.backend_pdf import PdfPages
+from scipy.integrate import simpson
 
 "Punto 1"
 
@@ -158,3 +159,206 @@ plt.close(fig)
 plt.clf()
 
 "Punto 3"
+
+#3.a
+
+t = 2
+alpha = 0.022  # Coeficiente dispersivo
+dt = 0.0001  # Paso temporal reducido para evitar inestabilidad
+n_p = 200  # Número de puntos espaciales
+n_t = int(t/dt)  # Tiempo total de la simulación
+dp = 2 / n_p  # Resolución espacial
+
+# Malla espacial y matriz de soluciones
+x = np.linspace(0, 2, n_p)
+matriz = np.zeros((n_t, n_p))
+
+# Condición inicial suave para evitar valores abruptos
+matriz[0] = np.cos(np.pi * x)
+
+# Primer paso temporal asegurando estabilidad numérica
+def primer_paso(matriz, dt, dp, alpha, n_p):
+    nueva_fila = np.zeros(n_p)
+    for i in range(n_p):
+        i_p1, i_m1 = (i + 1) % n_p, (i - 1) % n_p
+        i_p2, i_m2 = (i + 2) % n_p, (i - 2) % n_p
+
+        matriz_i = matriz[0, i]
+        matriz_ip1, matriz_im1 = matriz[0, i_p1], matriz[0, i_m1]
+        matriz_ip2, matriz_im2 = matriz[0, i_p2], matriz[0, i_m2]
+
+        # Término no lineal con factor de 1/3 corregido
+        no_lin = (1/3) * (matriz_ip1 + matriz_i + matriz_im1) * (matriz_ip1 - matriz_im1)
+        
+        # Término dispersivo
+        dispersivo = matriz_ip2 - 2 * matriz_ip1 + 2 * matriz_im1 - matriz_im2
+        
+        # Actualización con los mismos factores que el código funcional
+        nueva_fila[i] = matriz_i - (dt/dp) * no_lin - (alpha**2) * (dt / dp**3) * dispersivo
+    
+    return nueva_fila
+
+matriz[1] = primer_paso(matriz, dt, dp, alpha, n_p)
+
+@njit  # Aceleración con Numba para mejorar el rendimiento
+def iterar(matriz, n_t, n_p, dt, dp, alpha):
+    for n in range(1, n_t - 1):
+        for i in range(n_p):
+            i_p1, i_m1 = (i + 1) % n_p, (i - 1) % n_p
+            i_p2, i_m2 = (i + 2) % n_p, (i - 2) % n_p
+
+            matriz_i = matriz[n-1, i]  # Corrección: usar n-1 en vez de n
+            matriz_ip1, matriz_im1 = matriz[n, i_p1], matriz[n, i_m1]
+            matriz_ip2, matriz_im2 = matriz[n, i_p2], matriz[n, i_m2]
+
+            # Término no lineal con factor corregido
+            no_lin = (1/3) * (matriz_ip1 + matriz[n, i] + matriz_im1) * (matriz_ip1 - matriz_im1)
+
+            # Término dispersivo
+            dispersivo = matriz_ip2 - 2 * matriz_ip1 + 2 * matriz_im1 - matriz_im2
+
+            # Actualización corregida
+            matriz[n + 1, i] = matriz_i - (dt/dp) * no_lin - (alpha ** 2) * (dt / dp**3) * dispersivo
+
+    return matriz
+
+
+# Ejecutar la iteración
+matriz = iterar(matriz, n_t, n_p, dt, dp, alpha)
+
+# Graficar la evolución de la onda
+plt.figure(figsize=(10, 3))
+tiempos = np.linspace(0, t, n_t)
+plt.imshow(matriz.T, aspect='auto', cmap='plasma', origin='lower',
+           extent=[tiempos.min(), tiempos.max(), x.min(), x.max()])
+plt.colorbar(label=rf'$\Psi (t,x)$')
+plt.xlabel('Time (s)')
+plt.ylabel('Angle x (m)')
+plt.title('Solución')
+#plt.show() #La solución sí converge
+
+# Animación
+
+fig = plt.figure()
+ax = plt.axes(xlim=(0,2), ylim=(np.min(matriz), np.max(matriz)))
+punto, = ax.plot(x,matriz[0], 'b')
+
+def animacion(frame):
+    punto.set_ydata(matriz[frame])
+    return punto
+
+ani = animation.FuncAnimation(fig, animacion, frames=range(0, len(matriz),200), interval=50, blit=False)
+ani.save('3.a.mp4', writer='ffmpeg', fps=30)
+
+# 3.b
+
+# Calcular cantidades conservadas con scipy.integrate.simps
+tiempos = np.linspace(0, t, n_t)
+masa = simpson(matriz, x, axis=1)
+momento = simpson(matriz * np.gradient(matriz, dp, axis=1), x, axis=1)
+energia = simpson((1/3) * matriz**3 - (alpha * np.gradient(matriz, dp, axis=1))**2, x, axis=1)
+
+# Graficar cantidades conservadas
+fig, axs = plt.subplots(3, 1, figsize=(8, 10))
+axs[0].plot(tiempos, masa, label='Masa')
+axs[0].set_ylabel('Masa')
+axs[0].grid()
+
+axs[1].plot(tiempos, momento, label='Momento', color='r')
+axs[1].set_ylabel('Momento')
+axs[1].grid()
+
+axs[2].plot(tiempos, energia, label='Energía', color='g')
+axs[2].set_ylabel('Energía')
+axs[2].set_xlabel('Tiempo')
+axs[2].grid()
+
+plt.tight_layout()
+ruta_guardar_pdf =  ('3_b.pdf')
+plt.savefig(ruta_guardar_pdf,format="pdf", bbox_inches='tight')
+plt.close(fig)
+
+"Punto 4"
+
+c4=0.5
+#tiempo de la animacion:
+T4=10
+x4=np.linspace(0,2,int(2/0.01))
+y4 = np.linspace(0,1,int(1/0.01))
+#definiendo las condiciones de frontera:
+def condiciones1(x):
+#para los límites:
+    x[0,:] = 0
+    x[-1,:] = 0
+    x[:,0] = 0
+    x[:,-1] = 0
+#para los límites en la pared:
+    limitex1=int((1-0.02)/0.01)
+    limitex2=int((1+0.02)/0.01)
+    limitey1=int(0.42/0.01)
+    limitey2=int((1-0.42)/0.01)
+    x[limitex1-1:limitex2+1,:limitey1+1]=0
+    x[limitex1-1:limitex2+1,limitey2-1:]=0
+    return x
+
+onda=np.zeros((int(10/0.005), int(2/0.01), int(1/0.01)))
+
+for i in range(int(2/0.01)):
+    for j in range(int(1/0.01)):
+        onda[0,i,j]=2*np.exp(-150*(((x4[i]-2/5)**2)+((y4[j]-1/2)**2)))
+onda[0]=condiciones1(onda[0])
+for i in range(1, int(2/0.01)-1):
+    for j in range(1, int(1/0.01)-1):
+        onda[1,i,j] = onda[0,i,j]+(1/2)*(c4*0.005)**2*((onda[0, i+1, j]-2*onda[0,i,j]+onda[0,i-1,j])/0.01**2 + (onda[0, i, j+1]-2*onda[0, i, j] + onda[0, i, j-1])/0.01**2)
+onda[1]=condiciones1(onda[1])
+
+# Definir la lente
+lalente=np.zeros((int(2/0.01), int(1/0.01)), dtype=bool)
+lente_center_xce=int(1/0.01)
+lente_center_y=int(0.5/0.01)
+lente_radius_x=int(0.2/0.01)
+lente_radius_y=int(0.1/0.01)
+#para definir qué regiones del espacio estan en la lente:
+for k in range(int(2/0.01)):
+    for l in range(int(1/0.01)):
+        if ((((x4[k]-1)**2)/(lente_radius_x**2)) + (y4[l]-(1/2))**2/(lente_radius_y**2))<= 1:
+            lalente[k,l]=True
+
+c_lente=c4/5 # Velocidad de la onda en la lente
+limitex1=int((1-0.02)/0.01)
+limitex2=int((1+0.02)/0.01)
+limitey1=int(0.42/0.01)
+limitey2=int((1-0.42)/0.01)
+
+def evolucion(onda, iter):
+    for n in range(1, iter): #numero de iteraciones en el tiempo
+        for i in range(1, int(2/0.01)-1): #iteraciones en x
+            for j in range(1, int(1/0.01)-1): #iteraciones en y
+                if lalente[i, j]:
+                    c=c_lente
+                else:
+                    c=c4
+                onda[n+1, i, j] = 2*onda[n, i, j]- onda[n-1, i, j] + (c*0.005)**2 * ((onda[n, i+1, j] - 2*onda[n, i, j] + onda[n, i-1, j]) / 0.01**2 + (onda[n, i, j+1] - 2*onda[n, i, j] + onda[n, i, j-1]) / 0.01**2)
+        onda[n+1]=condiciones1(onda[n+1])
+    return onda
+onda=evolucion(onda, int(10/0.005)-1)
+fig, ax=plt.subplots()
+ax.set_xlim(0, 2)
+ax.set_ylim(0, 1)
+mask=np.zeros((int(2/0.01),int(1/0.01)),dtype=bool)
+mask[limitex1:limitex2,:limitey1]=True
+mask[limitex1:limitex2,limitey2:]=True
+cmap = ax.imshow(onda[0], extent=[0, 2, 0, 1], origin='lower', cmap='inferno', vmin=np.min(onda), vmax=np.max(onda))
+fig.colorbar(cmap)
+
+# Dibujar el lente
+lente_image=np.ma.masked_where(~lalente, np.ones((int(2/0.01),int(1/0.01))))
+ax.imshow(lente_image, extent=[0, 2, 0, 1], origin='lower', cmap='Blues', alpha=0.3)
+
+def draw_frame(frame):
+    frame_data = onda[frame].copy()
+    frame_data[mask] = np.nan
+    cmap.set_array(frame_data)
+    return [cmap]
+anim4 = animation.FuncAnimation(fig, draw_frame, frames=range(0, len(onda), 10), interval=50, blit=False)
+anim4.save("4_a.mp4", writer="ffmpeg", fps=20)
