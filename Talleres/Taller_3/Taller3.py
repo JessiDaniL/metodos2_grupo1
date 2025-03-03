@@ -166,8 +166,8 @@ def periodo_simulacion(tiempo, posiciones):
         return tiempos_de_cruce[1] - tiempos_de_cruce[0]
     return None
 
-T_sim = (periodo_simulacion(t_v, y_r))*24.18884*1e6
-T_teo = (2 * np.pi)*24.18884*1e6
+T_sim = (periodo_simulacion(t_v, y_r))*24.18884
+T_teo = (2 * np.pi)*24.18884
 
 #1 h_barra / E = 24.18884 attosegundos
 
@@ -226,12 +226,17 @@ def runge_kuttal(F,y_0,ts,dt):
     y_v[0, :] = y_0.copy()
 
     i = 0
+    u_indice = None
+    r_a = 1
 
     while True:
         t = t_v[i]
         y_next = RK4_stepl(F, y_v[i], t, dt)
 
         r = np.sqrt(y_next[0]**2 + y_next[1]**2)  # Distancia al origen
+
+        if r > 0.01 and r < r_a:
+            u_indice = i
         if r < 0.01 or t >= ts[1]:  # Condición de salida
             break
         
@@ -240,13 +245,15 @@ def runge_kuttal(F,y_0,ts,dt):
         t_v[i] = t + dt
         y_v[i, :] = y_next
 
-    return t_v[:i+1], y_v[:i+1]
+        r_a = r
+
+    return t_v[:i+1], y_v[:i+1],u_indice
 
 condiciones_iniciales_l =np.array([x0, y0, vx0, vy0, 0.0])
 t_sl = (0,1000)
 dt_l = 0.1
 
-t_vl, y_vl = runge_kuttal(f_prime_larmor, condiciones_iniciales_l, t_sl, dt_l)
+t_vl, y_vl,u_indice = runge_kuttal(f_prime_larmor, condiciones_iniciales_l, t_sl, dt_l)
 
 xl, yl, vxl, vyl, a_ml = y_vl[:, 0], y_vl[:, 1], y_vl[:, 2], y_vl[:, 3], y_vl[:,4]
 
@@ -306,7 +313,7 @@ ani.save("Talleres/Taller_3/orbita_electron.mp4", writer=animation.FFMpegWriter(
 
 
 
-tiempo_de_caida = t_vl[-48] * 24.188*1e6
+tiempo_de_caida = t_vl[u_indice] * 24.188
 print(f'2.b El electrón tiene un tiempo de caida de {tiempo_de_caida:5f} attosegundos')
 
 
