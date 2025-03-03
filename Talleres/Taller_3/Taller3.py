@@ -424,7 +424,7 @@ plt.scatter(t_aphelios, ang_aphelios, color=mercury_color,
 
 
 plt.xlabel("años")
-plt.ylabel(rf"$\arcsec$")
+plt.ylabel(rf"$arcsec$")
 plt.title("Presición anómala de Mercurio")
 plt.legend()
 
