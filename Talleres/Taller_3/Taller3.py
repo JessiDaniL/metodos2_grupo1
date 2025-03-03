@@ -71,7 +71,7 @@ plt.xscale('log')
 plt.xlabel(r" $\beta$ (kg/m)")
 plt.ylabel(r"$\theta$ (grados)")
 plt.grid()
-plt.savefig("1.a.pdf")
+plt.savefig("Talleres/Taller_3/1.a.pdf")
 
 plt.figure(figsize=(8, 5))
 plt.plot(bs, energias, marker='o', linestyle='-', color='b')
@@ -79,7 +79,7 @@ plt.xscale('log')
 plt.xlabel(r" $\beta$ (kg/m)")
 plt.ylabel(r"$\Delta E$ (J)")
 plt.grid()
-plt.savefig("1.b.pdf")
+plt.savefig("Talleres/Taller_3/1.b.pdf")
 print("1.b) La energía perdida cuando el coeficiente de fricción es 0 es: ", deltae(0))
 
 "Punto 2"
@@ -278,7 +278,7 @@ for ax, title in zip(axs, ["Energía Total", "Energía Cinética", "Radio"]):
     ax.legend()
     ax.grid()
 
-plt.savefig("2.b.diagnostics.pdf")  # Guardar la gráfica de diagnósticos
+plt.savefig("Talleres/Taller_3/2b.diagnostics.pdf")  # Guardar la gráfica de diagnósticos
 plt.close()
 
 paso_animacion = 3
