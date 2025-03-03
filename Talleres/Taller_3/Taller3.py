@@ -355,7 +355,7 @@ def animate(i):
     return punto, linea
 
 # Crear la animación
-anim = animation.FuncAnimation(fig, animate, frames=range(0, len(t_dense), 10), interval=10)
+anim = animation.FuncAnimation(fig, animate, frames=range(0, len(t_dense), 1), interval=10)
 
 
 # Guardar la animación
