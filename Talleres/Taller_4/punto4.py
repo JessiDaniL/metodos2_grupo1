@@ -139,6 +139,3 @@ plt.ylabel('Porcentaje de palabras válidas')
 plt.title('Evaluación de generación de texto con cadenas de Markov')
 plt.grid()
 plt.savefig('Talleres\Taller_4\ 4.pdf')
-plt.show()
-
-print("Generación de textos completada. Gráfica guardada como 4.pdf")
