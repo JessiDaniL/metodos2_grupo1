@@ -79,7 +79,7 @@ n_values = range(1, 8)  # Probar valores de n desde 1 hasta 7
 word_list = set()
 
 # Cargar lista de palabras en inglés
-with open('/mnt/data/words_alpha.txt', 'r', encoding='utf-8') as f:
+with open('Talleres\Taller_4\words_alpha.txt', 'r', encoding='utf-8') as f:
     word_list = set(f.read().splitlines())
 
 # Construcción de la tabla de frecuencias
@@ -128,7 +128,7 @@ for n in n_values:
     results[n] = valid_percentage
     
     # Guardar el texto generado
-    with open(f'Talleres\Taller_4\textos\gen_text_n{n}.txt', 'w', encoding='utf-8') as f:
+    with open(r'Talleres\Taller_4\textos\gen_text_n{n}.txt', 'w', encoding='utf-8') as f:
         f.write(generated_text)
 
 # Graficar resultados
