@@ -5,6 +5,103 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import random
 
+"Punto 1"
+
+# 1.a
+
+def g_x(x,n=10,alpha=4/5):
+    return sum(np.exp(-(x - k)**2 * k) / k**alpha for k in range(1, n+1))
+
+def metropolis_hastings(g, num_samples=1000000, proposal_width=1.0, x_init=5):
+    samples = []
+    x = x_init
+    for _ in range(num_samples):
+        x_proposed = x + np.random.uniform(-proposal_width, proposal_width)
+        acceptance_ratio = g(x_proposed) / g(x) if g(x) > 0 else 0
+        if np.random.rand() < acceptance_ratio:
+            x = x_proposed
+        samples.append(x)
+    return np.array(samples)
+
+samples = metropolis_hastings(g_x)
+
+plt.figure(figsize=(10, 6))
+plt.hist(samples, bins=200, density=True, color='b', edgecolor='black')
+plt.xlabel("x")
+plt.title("Histograma de muestras generadas")
+plt.savefig('Talleres\Taller_4\ 1.a.pdf')
+
+# 1.b
+
+pi_sqrt= np.sqrt(np.pi)
+
+def gaussiana(x):
+    return np.exp(-x**2)
+
+div= gaussiana(samples)/g_x(samples)
+suma = np.sum(div)
+
+# Calcular A y su incertidumbre
+mean_s = np.mean(div)
+std_s = np.std(div, ddof=1)
+A = np.sqrt(np.pi) / mean_s
+sigma_A = np.sqrt(np.pi) * std_s / (np.sqrt(1000000) * mean_s)
+
+print(f"1.b) {sigma_A:.6f}")
+
+"Punto 2"
+
+D1= 50
+D2 = 50
+lam = 670e-7
+A = 0.04
+a = 0.01
+d = 0.1
+
+N = 100000
+
+#Intereferencia de Fresnel
+
+x_muestras = np.random.uniform(-A/2, A/2, N)
+y_muestras = np.concatenate([
+    np.random.uniform(-d/2 - a/2, -d/2 + a/2, N // 2),
+    np.random.uniform(d/2 - a/2, d/2 + a/2, N // 2)
+])
+
+z_muestras = np.linspace(-0.4, 0.4, 500)
+
+def integral_Fresnel(x_muestras, y_muestras, z, D1, D2, lam):
+    parte_1 = (2 * np.pi / lam) * (D1 + D2)
+    parte_xy = (np.pi / (lam * D1)) * (x_muestras - y_muestras) ** 2
+    parte_zy = (np.pi / (lam * D2)) * (z - y_muestras) ** 2 
+
+    integral = np.sum(np.exp(1j * (parte_1 + parte_xy + parte_zy))) / N
+    return np.abs(integral) ** 2
+
+intensidad_f = np.array([integral_Fresnel(x_muestras, y_muestras, z, D1, D2, lam) for z in z_muestras])
+intensidad_normalizada_f = intensidad_f/np.max(intensidad_f)
+
+#Modo Clásico
+
+angulo = np.arctan(z_muestras/D2)
+
+intensidad_c = (np.cos(((np.pi * d)/lam)*np.sin(angulo)))**2 * (np.sinc((a/lam)*np.sin(angulo)))**2
+
+intensidad_normalizada_c = intensidad_c/np.max(intensidad_c)
+
+plt.figure(figsize=(8, 5))
+plt.plot(z_muestras, intensidad_normalizada_f, label='Interferencia de Fresnel', color='b')
+plt.plot(z_muestras, intensidad_normalizada_c, label='Intensidad clásica', linestyle='--', color='r')
+plt.xlabel("Posición en la pantalla (cm)")
+plt.ylabel("Intensidad normalizada")
+plt.legend()
+plt.title("Comparación de la interferecia de Fresnel y la intensidad clásica")
+plt.savefig('Talleres\Taller_4\ 2.pdf')
+
+"Punto 3"
+
+"Punto 4"
+
 # 4.a
 
 # Cargar el texto
@@ -139,3 +236,5 @@ plt.ylabel('Porcentaje de palabras válidas')
 plt.title('Evaluación de generación de texto con cadenas de Markov')
 plt.grid()
 plt.savefig('Talleres\Taller_4\ 4.pdf')
+
+print("4.c) El número de n-gramas adecuado para generar texto con cadenas de Markov es a partir de 4, donde tiene un porcentaje de palabras válidas de {:.2f}%".format(results[4]))
