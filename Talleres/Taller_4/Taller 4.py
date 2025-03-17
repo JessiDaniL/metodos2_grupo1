@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 import random
 
 "Punto 1"
@@ -99,6 +100,29 @@ plt.title("Comparación de la interferecia de Fresnel y la intensidad clásica")
 plt.savefig('Talleres\Taller_4\ 2.pdf')
 
 "Punto 3"
+
+N=150  # Tamaño de la malla
+frames=500  # Número de frames para la animación
+
+spins=np.random.choice([-1,1],size=(N,N))
+
+fig,ax=plt.subplots()
+img = ax.imshow(spins,cmap='gray',interpolation='nearest')
+
+def sistema(x):
+    for _ in range(400):
+        #Tomamos una variable aleatoria
+        i,j=np.random.randint(0,N,2)
+        #Tomamos J que es la interaccion de los espines como 0.2
+        delta=2*0.2*spins[i,j]*(spins[(i+1)% N,j]+spins[i,(j+1)%N]+spins[(i-1)% N,j]+spins[i,(j-1)%N])
+        if delta<=0 or np.random.rand()<np.exp(-10*delta):
+          #Si la anterior condicion se cumple
+            spins[i,j]*=-1
+    img.set_array(spins)
+    return [img]
+
+ani=animation.FuncAnimation(fig, sistema, frames=500, blit=True)
+ani.save('Talleres\Taller_4\ 3.mp4', writer='ffmpeg')
 
 "Punto 4"
 
